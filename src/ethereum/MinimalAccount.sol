@@ -50,6 +50,13 @@ contract MinimalAccount is IAccount, Ownable {
     /*//////////////////////////////////////////////////////////////
                            EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice execute a transaction
+     * @param dest address of the contract
+     * @param value value you want to transfer
+     * @param functionData function you want to call in bytes from with parameters
+     */
     function execute(address dest, uint256 value, bytes calldata functionData) external requireFromEntryPointOrOwner {
         (bool success, bytes memory result) = dest.call{value: value}(functionData);
         if (!success) {
@@ -59,11 +66,11 @@ contract MinimalAccount is IAccount, Ownable {
 
     /**
      *
-     * @param userOp a
+     * @param userOp User Operation struct
      * @param userOpHash Hash of the user's request data. can be used as the basis for signature
      * @param missingAccountFunds fees you need to pay entrypoint contract for the call
      * @dev This function is called by the EntryPoint contract, to validate the UserOperation.
-     * @dev A signature is valid, if it's the contract owner
+     * @dev A signature is valid, if it's the contract ( MinimalAccount ) owner
      */
     function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
         external
