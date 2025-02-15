@@ -17,7 +17,7 @@ contract DeployMinimal is Script {
 
         MinimalAccount minimalAccount = new MinimalAccount(config.entryPoint);
         // doubt: why do we need to transfer ownership to the deployer? beacuse deployer already owns the contract
-        minimalAccount.transferOwnership(msg.sender);
+        minimalAccount.transferOwnership(config.account);
 
         vm.stopBroadcast();
         return (helperConfig, minimalAccount);
