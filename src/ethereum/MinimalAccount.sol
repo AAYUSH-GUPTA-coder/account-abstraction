@@ -27,7 +27,9 @@ contract MinimalAccount is IAccount, Ownable {
                                MODIFIERS
     //////////////////////////////////////////////////////////////*/
     modifier requireFromEntryPoint() {
-        revert MinimalAccount__NotFromEntryPoint();
+        if (msg.sender != address(i_entryPoint)) {
+            revert MinimalAccount__NotFromEntryPoint();
+        }
         _;
     }
 
@@ -84,7 +86,6 @@ contract MinimalAccount is IAccount, Ownable {
     /*//////////////////////////////////////////////////////////////
                            INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-
     // EIP-191 version of the signed hash
     function _validateSignature(PackedUserOperation calldata userOp, bytes32 userOpHash)
         internal
@@ -92,7 +93,6 @@ contract MinimalAccount is IAccount, Ownable {
         returns (uint256 validationData)
     {
         bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
-        // Returns the address that signed a hashed message (`hash`) with `signature`
         address signer = ECDSA.recover(ethSignedMessageHash, userOp.signature);
         if (signer != owner()) {
             return SIG_VALIDATION_FAILED;
@@ -104,15 +104,13 @@ contract MinimalAccount is IAccount, Ownable {
     function _payPrefund(uint256 missingAccountFunds) internal {
         if (missingAccountFunds != 0) {
             (bool success,) = payable(msg.sender).call{value: missingAccountFunds, gas: type(uint256).max}("");
-            // entrypoint contract themselves going to check the success that why not checking it here again
             (success);
         }
     }
 
     /*//////////////////////////////////////////////////////////////
-                            GETTER FUNCTION
+                                GETTER FUNCTION
     //////////////////////////////////////////////////////////////*/
-
     function getEntryPoint() external view returns (address) {
         return address(i_entryPoint);
     }
